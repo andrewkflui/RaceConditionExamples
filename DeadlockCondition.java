@@ -16,11 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  */
 public class DeadlockCondition {
-
-    static class Buffer {
-        static int value = 0;
-    }
-
+    private static int value = 0;
     private static Thread threadA;
     private static Thread threadB;
     private static Lock lockA, lockB;
@@ -33,7 +29,7 @@ public class DeadlockCondition {
                 for (int i = 0; i < LOOP_COUNT; i++) {
                     lockA.lock();  // Acquire Lock A and then Lock B
                     lockB.lock();
-                    Buffer.value = Buffer.value + 1;
+                    value = value + 1;
                     updatedTime = System.currentTimeMillis(); 
                     lockB.unlock(); // the release should always be in FILO order
                     lockA.unlock();
@@ -51,7 +47,7 @@ public class DeadlockCondition {
                 for (int i = 0; i < LOOP_COUNT; i++) {
                     lockB.lock();  // Acquire Lock B and then Lock A, which is not the same order as in Process A
                     lockA.lock(); 
-                    Buffer.value = Buffer.value - 1;
+                    value = value - 1;
                     updatedTime = System.currentTimeMillis(); 
                     lockA.unlock(); // the release should always be in FILO order
                     lockB.unlock();
@@ -73,8 +69,8 @@ public class DeadlockCondition {
                     }
                     Thread.sleep(5);
                         if (prevTime == updatedTime) {
-                        if (Buffer.value != 0) {
-                            System.out.println("ERROR: Looks like deadlock has happened. The current value is " + Buffer.value);
+                        if (value != 0) {
+                            System.out.println("ERROR: Looks like deadlock has happened. The current value is " + value);
                             break;
                         } else {
                             System.out.println("Finishing ...");
@@ -91,7 +87,7 @@ public class DeadlockCondition {
 
     public static void main(String args[]) throws Exception {
         long startTime = System.currentTimeMillis();
-        Buffer.value = 0;
+        value = 0;
         lockA = new ReentrantLock();
         lockB = new ReentrantLock();
         threadA = new Thread(new TestProcessA());
@@ -102,8 +98,8 @@ public class DeadlockCondition {
         monitorThread.start();
         threadA.join();
         threadB.join();
-        if (Buffer.value != 0) {
-            System.out.println("Error found due to race condition: value is " + Buffer.value + " (should be 0)");
+        if (value != 0) {
+            System.out.println("Error found due to race condition: value is " + value + " (should be 0)");
         } else {
             System.out.println("The threads have finished and no deadlock occured");
         }
