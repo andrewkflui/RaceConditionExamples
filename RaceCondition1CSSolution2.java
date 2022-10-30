@@ -62,13 +62,13 @@ public class RaceCondition1CSSolution2 {
         int testnum = 100; // run 100 epochs
         int countError = 0;
         long startTime = System.currentTimeMillis();
-        Thread monitor = new Thread(new Monitor());
-        monitor.start();
         for (int i = 0; i < testnum; i++) {
             System.out.print("[RUN " + i + "]");
             value = 0;
             Thread threadA = new Thread(new TestProcessA());
             Thread threadB = new Thread(new TestProcessB());
+            Thread monitor = new Thread(new Monitor());
+            monitor.start();
             threadA.start();
             threadB.start();
             threadA.join(); // blocked until threadA has finished
@@ -79,12 +79,12 @@ public class RaceCondition1CSSolution2 {
             } else {
                 System.out.println("The threads have finished and no race condition found");
             }
+            monitor.interrupt();
+            monitor.join();
         }
         long endTime = System.currentTimeMillis();
         long timeTaken = (endTime - startTime);
         System.out.println("Number of errors due to race conditions: " + countError + " out of " + testnum + " epochs");
         System.out.println("Time taken = " + timeTaken + " ms");
-        monitor.interrupt();
-        monitor.join();
     }
 }

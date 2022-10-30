@@ -7,13 +7,14 @@ About: This program demonstrates an inadequate solution based on the critical se
 
 Instruction: (1) Execute the program and race condition should occur sometimes due to the shared variable value 
 (2) Observe how the critical section solution #2 is implemented and UNCOMMENT the two while loops (3) Execute the prgoram again, and this time deadlock can occur in
-some of the 100 epochs. 
+some of the 100 epochs. The limitation is that a process can get trapped in the while loop is the other process never arrives again (due to the other process
+has not started or already finished)
  */
 
 public class RaceCondition1CSSolution1 {
     static final int COUNT = 1000000; // number of addition for Process A and substract for Process B
     static int value; // a shared variable between threads
-    private static int turn = 2;
+    private static int turn;
     static long updatedTime = System.currentTimeMillis(); // a variable recording the last update of the variable value
 
     static class TestProcessA implements Runnable {
@@ -43,7 +44,8 @@ public class RaceCondition1CSSolution1 {
                 try {
                     Thread.sleep(1000);
                     if (prevTime == updatedTime) {
-                            System.out.println("ERROR: Looks like deadlock has happened. The current value is " + value);
+                        System.out.println("ERROR: Looks like deadlock has happened. The current value is " + value + " and the turn is " + turn);
+                        return;
                     }
                     prevTime = updatedTime;
                 } catch (Exception ex) {
@@ -57,13 +59,14 @@ public class RaceCondition1CSSolution1 {
         int testnum = 100; // run 100 epochs
         int countError = 0;
         long startTime = System.currentTimeMillis();
-        Thread monitor = new Thread(new Monitor());
-        monitor.start();
         for (int i = 0; i < testnum; i++) {
             System.out.print("[RUN " + i + "]");
+            turn = 1;
             value = 0;
             Thread threadA = new Thread(new TestProcessA());
             Thread threadB = new Thread(new TestProcessB());
+            Thread monitor = new Thread(new Monitor());
+            monitor.start();
             threadA.start();
             threadB.start();
             threadA.join(); // blocked until threadA has finished
@@ -74,12 +77,13 @@ public class RaceCondition1CSSolution1 {
             } else {
                 System.out.println("The threads have finished and no race condition found");
             }
+            monitor.interrupt();
+            monitor.join();
         }
         long endTime = System.currentTimeMillis();
         long timeTaken = (endTime - startTime);
         System.out.println("Number of errors due to race conditions: " + countError + " out of " + testnum + " epochs");
         System.out.println("Time taken = " + timeTaken + " ms");
-        monitor.interrupt();
-        monitor.join();
+
     }
 }
