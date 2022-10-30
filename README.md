@@ -1,4 +1,4 @@
-# Examples of Race Condition and Deadlock
+# Examples of Race Condition and Deadlock for Teaching Operating Systems
 Java programming illustrations for teaching and learning in an Operating Systems course
 
 Copyright (C) 2021 - Andrew Kwaok-Fai Lui
